@@ -1,0 +1,12 @@
+export("crops")
+
+importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty)
+import(reshape)
+import(tidyverse)
+import(memoise)
+import(ggplot2)
+import(magrittr)
+
+export(crops)
+
+exportMethods(plot,segmentations)

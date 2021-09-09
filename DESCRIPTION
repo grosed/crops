@@ -1,0 +1,14 @@
+Package: crops
+Type: Package
+Title: Implements the Changepoints for a Range of Penalties (CROPS) algorithm.
+Version: 1.0.0
+Date: 2021-09-09
+Author: Daniel Grose <dan.grose@lancaster.ac.uk>
+Maintainer:  Daniel Grose <dan.grose@lancaster.ac.uk>
+Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm.
+License: GPL
+Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr
+Depends: R (>= 4.0.0)
+RdMacros: Rdpack
+
+
