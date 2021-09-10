@@ -8,7 +8,7 @@ Maintainer:  Daniel Grose <dan.grose@lancaster.ac.uk>
 Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm.
 License: GPL
 Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr
-Depends: R (>= 4.0.0)
+# Depends: R (>= 4.0.0)
 RdMacros: Rdpack
 
 
