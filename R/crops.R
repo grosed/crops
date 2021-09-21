@@ -1,10 +1,70 @@
+#' A technique for ...
+#'
+#' @name crops 
+#'
+#' @description A technique for ... 
+#'
+#' @param method A ...
+#' @param beta_min A ...
+#' @param beta_max A ...
+#' @param max_iterations A ...
+#' 
+#' @return An instance of an S4 class of type crops.class. 
+#'
+#' @examples
+#' # generate some simple data
+#' set.seed(1)
+#' N <- 100
+#' data.vec <- c(rnorm(N), rnorm(N, 2), rnorm(N))
+#'
+#' # example one - calling fpop with crops using global scope
+#' # need the fpop library
+#' library(pacman)
+#' p_load(fpop)
+#' # create a function to wrap a call to fpop for use with crops
+#' fpop.for.crops<-function(beta)
+#'     {
+#'        fit <- Fpop(data.vec, beta)
+#'        end.vec <- fit$t.est
+#'        change.vec <- end.vec[-length(end.vec)]
+#'        start.vec <- c(1, change.vec+1)
+#'        segs.list <- list()
+#'        for(seg.i in seq_along(start.vec))
+#'            {
+#'             start <- start.vec[seg.i]
+#'             end <- end.vec[seg.i]
+#'             seg.data <- data.vec[start:end]
+#'             seg.mean <- mean(seg.data)
+#'             segs.list[[seg.i]] <- data.frame(
+#'                                     start, end,
+#'                                     mean=seg.mean,
+#'                                     seg.cost=sum((seg.data-seg.mean)^2))
+#'             }
+#'         segs <- do.call(rbind, segs.list)
+#'         return(list(sum(segs$seg.cost),nrow(segs),segs$end))
+#'     }
+#'
+#' # now use this wrapperfunction with crops
+#' res<-crops(fpop.for.crops,0.5*log(300),2.5*log(300))
+#' # and plot the results
+#' plot(res)
+#'
 crops <-
-function(method,beta_min,beta_max,...)
-    {   
-       CPT<-memoise(function(.) return(as.tuple(method(.,...))))
+function(method,beta_min,beta_max,max_iterations=Inf,...)
+    {
+       check_crops_arguments(method,beta_min,beta_max,max_iterations)
+       CPT<-memoise(function(.)
+       {
+	   res <- method(.,...) 
+           check_method_return_values(res)
+           return(as.tuple(res))
+       })
+       tryCatch(
+       {
        beta_star <- set(tuple(beta_min,beta_max))
        log <- set()
-       while(!set_is_empty(beta_star))
+       iterations <- 0
+       while(!set_is_empty(beta_star) && iterations < max_iterations)
            {
              for(t in beta_star)
                  {
@@ -25,79 +85,23 @@ function(method,beta_min,beta_max,...)
                     }
                   beta_star <- set_symdiff(beta_star,set(t))
                  }
+	     iterations <- iterations + 1	 
             }
+	if(iterations == max_iterations)
+	{
+	   warning(paste("maximum number of iterations (=",max_iterations,") reached in crops.",'\n',sep=""))
+	}
         return(crops.class(log))
-    }
+	},
+	interrupt = function(e)
+	            {
+		      warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
+		      return(crops.class(log))
+	            }
+	)
+    } 
 
 
 
-setOldClass("set")
-.crops.class<-setClass("crops.class",representation(log="set"))
-crops.class<-function(log)
-{
-    .crops.class(log=log)
-}
 
-
-setGeneric("segmentations",function(object) {standardGeneric("segmentations")})
-setMethod("segmentations",signature=list("crops.class"),
-          function(object)
-          {
-            n <- max(unlist(Map(function(.) length(unlist(.)),as.list(object@log)))) - 3
-            cpts <- Map(function(y) c(y[[4]],rep(NA,n-length(y[[4]]))), as.list(object@log))
-            mat <- Reduce(rbind,cpts,matrix(nrow=0,ncol=n),right=TRUE)
-            colnames(mat) <- unlist(Map(function(i) paste("cpt.",i,sep=""),1:n))
-            df<-data.frame(beta=numeric(),Qm=numeric(),Q=numeric(),m=numeric())
-            for(item in object@log)
-               {
-                  df[nrow(df)+1,] <- c(item[1:2],item[2] + item[3]*item[1],item[3])
-               }
-            df <- cbind(df,mat)
-            return(df)
-            
-})
-
-
-setMethod("plot",signature=list("crops.class","data.frame"),
-          function(x,y)
-          {
-	    object <- x
-	    data <- y
-            p <- plot(object)
-            df <- segmentations(object)
-            n <- nrow(df)
-            y <- data[,2]
-            y <- y - min(y)
-            y <- 0.75*n*y/(max(y) - min(y))
-            y <- y + n/2 - mean(y) 
-            x <- data[,1]
-            p <- p + geom_line(data=data.frame(a=x,b=y),aes(x=a,y=b),alpha=0.2)
-            return(p)
-          })
-
-setMethod("plot",signature=list("data.frame","crops.class"),
-          function(x,y)
-          {
-	    return(plot(y,x))
-          })
-
-
-setMethod("plot",signature=list("crops.class","missing"),
-          function(x)
-          {
-	     object <- x
-             df <- segmentations(object)
-	     df <- cbind(df,data.frame("dummy"=1:nrow(df)))
-             p <- df %>%
-	          subset(.,select = -c(beta,Q,Qm,m)) %>%
-                  melt(., id=c("dummy")) %>% 
-                  .[complete.cases(.), ] %>%
-                  ggplot(.,aes(x=value,y=dummy)) %>% 
-                  add(geom_point()) %>%
-                  add(labs(x="location",y="penalty")) %>%
-                  add(geom_hline(aes(yintercept=dummy))) %>%
-                  add(scale_y_continuous(breaks = seq(1:nrow(df)),labels=signif(df$beta,digits=3),sec.axis = sec_axis( ~.,breaks = seq(1:nrow(df)),labels=signif(df$Q,digits=4),name="penalised cost"))) %>%
-                  add(theme_bw())
-             return(p)       
-          })
 	  
