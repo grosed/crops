@@ -1,14 +1,14 @@
 Package: crops
 Type: Package
-Title: Implements the Changepoints for a Range of Penalties (CROPS) algorithm.
+Title: Implements the Changepoints for a Range of Penalties (CROPS) Algorithm
 Version: 1.0.0
-Date: 2021-09-09
-Author: Daniel Grose <dan.grose@lancaster.ac.uk>
+Date: 2021-09-22
+Author: Daniel Grose <dan.grose@lancaster.ac.uk>, Paul Fearnhead <p.fearnhead@lancaster.ac.uk>
 Maintainer: Daniel Grose <dan.grose@lancaster.ac.uk>
-Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm.
+Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm of Haynes et al. (2014).
 License: GPL
-Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, pacman, Rdpack
-Suggests: fpop
-# Depends: R (>= 4.0.0)
+Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, pacman, Rdpack, methods
+Suggests: fpop, knitr, rmarkdown
+VignetteBuilder: knitr
 RdMacros: Rdpack
 RoxygenNote: 7.1.1

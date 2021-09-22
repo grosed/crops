@@ -41,8 +41,6 @@ check_method_return_values <- function(res)
     {
       msg <- paste("Second value in the list returned by method should be a single positive real value. See crops documentation.")
       msg <- paste(msg,'\n')
-      msg <- paste(msg,"Note that method was called with beta_min = ",beta_min," and beta_max = ",beta_max,sep="")
-      msg <- paste(msg,'\n')
       stop(msg)
     }
     if(!is(res[[3]],'numeric'))

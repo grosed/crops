@@ -1,6 +1,8 @@
 export("crops")
 
 importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty)
+importFrom(methods,is,new)
+importFrom(stats,complete.cases)
 import(reshape)
 import(tidyverse)
 import(memoise)
@@ -9,4 +11,4 @@ import(magrittr)
 
 export(crops)
 
-exportMethods(plot,segmentations)
+exportMethods(plot,segmentations,summary)

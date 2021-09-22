@@ -2,24 +2,30 @@
 % Please edit documentation in R/crops.R
 \name{crops}
 \alias{crops}
-\title{A technique for ...}
+\title{Generic implementation of the crops algorithm (ref goes here).}
 \usage{
 crops(method, beta_min, beta_max, max_iterations = Inf, ...)
 }
 \arguments{
-\item{method}{A ...}
+\item{method}{A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost, number of changepoints, and
+a vector of changepoint locations corresponding to the optimal segmentation as determined by a penalised cost changepoint method.}
 
-\item{beta_min}{A ...}
+\item{beta_min}{A positive numeric value indicating the smallest penalty value to consider.}
 
-\item{beta_max}{A ...}
+\item{beta_max}{A positive numeric value indicating the maximum penalty value to consider.}
 
-\item{max_iterations}{A ...}
+\item{max_iterations}{Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=Inf}}
+
+\item{...}{Additional parameters to pass to the underlying changepoint method if required.}
 }
 \value{
-An instance of an S4 class of type crops.class.
+An instance of an S4 class of type \code{crops.class}.
 }
 \description{
-A technique for ...
+Provides a generic implementation of the crops (changepoints for a range of penalties) algorithm of Haynes et al. (2014)  which efficiently searches a range of penalty values in multiple changepoint problems.
+The crops algorithm finds the optimal segmentations for a different number of segments without incurring as large a computational cost as solving the constrained optimisation problem
+for a range of values for the number of changepoints. To make the method generic, the user must provide a function that maps a penalty value to the results obtained by a penalised cost
+changepoint method, and formats these results in a specific way. This interface to the generic method is similar to that as used by the \pkg{optimx} package.
 }
 \examples{
 # generate some simple data
@@ -27,13 +33,14 @@ set.seed(1)
 N <- 100
 data.vec <- c(rnorm(N), rnorm(N, 2), rnorm(N))
 
-# example one - calling fpop with crops using global scope
+# example one - calling fpop via crops using global scope
 # need the fpop library
 library(pacman)
 p_load(fpop)
 # create a function to wrap a call to fpop for use with crops
 fpop.for.crops<-function(beta)
     {
+       # Note - this code is taken from the example in the fpop package
        fit <- Fpop(data.vec, beta)
        end.vec <- fit$t.est
        change.vec <- end.vec[-length(end.vec)]
@@ -51,12 +58,32 @@ fpop.for.crops<-function(beta)
                                     seg.cost=sum((seg.data-seg.mean)^2))
             }
         segs <- do.call(rbind, segs.list)
-        return(list(sum(segs$seg.cost),nrow(segs),segs$end))
+        return(list(sum(segs$seg.cost),nrow(segs)-1,segs$end[-length(segs$end)]))
     }
 
-# now use this wrapperfunction with crops
+# now use this wrapper function with crops
 res<-crops(fpop.for.crops,0.5*log(300),2.5*log(300))
-# and plot the results
+# print summary of analysis
+summary(res)
+# summarise the segmentations
+segmentations(res)
+# visualise the segmentations
 plot(res)
+# overlay the data on the segmentations
+df <- data.frame("x"=1:300,"y"=data.vec)
+plot(res,df) 
 
+}
+\references{
+\insertRef{crops-article}{crops}
+
+\insertRef{optimx-1}{crops}
+
+\insertRef{optimx-2}{crops}
+
+\insertRef{optimx-package}{crops}
+
+\insertRef{fpop-article}{crops}
+
+\insertRef{fpop-package}{crops}
 }

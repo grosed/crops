@@ -1,0 +1,66 @@
+---
+title: An R Markdown document converted from "crops-package-demonstration.ipynb"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r}
+library(crops)
+library(pacman)
+p_load(fpop)
+```
+
+```{r}
+set.seed(0)
+y<-c(rnorm(100,0,1),rnorm(100,2,1),rnorm(100,0,1))
+```
+
+```{r}
+fpop.crops <- function(x,mini = min(x), maxi = max(x),
+                       lambda_min=0.5*log(length(x)),lambda_max=3.5*log(length(x)),max_iterations=50)
+{
+    fpop.for.crops<-function(lambda)
+    {
+       fit <- Fpop(x=x,lambda=lambda,min=mini,maxi=maxi)
+       end.vec <- fit$t.est
+       change.vec <- end.vec[-length(end.vec)]
+       start.vec <- c(1, change.vec+1)
+       segs.list <- list()
+       for(seg.i in seq_along(start.vec))
+           {
+            start <- start.vec[seg.i]
+            end <- end.vec[seg.i]
+            seg.data <- x[start:end]
+            seg.mean <- mean(seg.data)
+            segs.list[[seg.i]] <- data.frame(
+                                    start, end,
+                                    mean=seg.mean,
+                                    seg.cost=sum((seg.data-seg.mean)^2))
+            }
+        segs <- do.call(rbind, segs.list)
+        return(list(sum(segs$seg.cost),nrow(segs)-1,segs$end[-length(segs$end)]))
+    }
+    return(crops(fpop.for.crops,lambda_min,lambda_max,max_iterations))
+}
+```
+
+```{r}
+res <- fpop.crops(y)
+```
+
+```{r}
+plot(res)
+```
+
+```{r}
+X <- data.frame("x"=1:300,"y"=y)
+plot(res,X)
+```
+
+```{r}
+summary(res)
+```
+
