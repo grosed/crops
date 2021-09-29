@@ -5,7 +5,7 @@
 \alias{plot}
 \alias{plot,crops.class,data.frame-method}
 \alias{plot,crops.class,missing-method}
-\title{Visualisation of data, costs, penatly values and changepoint locations.}
+\title{Visualisation of data, costs, penalty values and changepoint locations.}
 \usage{
 \S4method{plot}{crops.class,data.frame}(x, y)
 
@@ -14,13 +14,13 @@
 \arguments{
 \item{x}{An instance of an S4 class produced by \code{\link{crops}}.}
 
-\item{y}{A dataframe containing the locations and values of the data points. The data will be overlayed on the changepoint locations.}
+\item{y}{A dataframe containing the locations and values of the data points. The data plot is plotted below, and is aligned with, the changepoint locations.}
 }
 \value{
 A ggplot object.
 }
 \description{
-Plot methods for an S4 object returned by \code{\link{crops}}. The plot can also overlay the original data over the changepoint locaations if required.
+Plot methods for an S4 object returned by \code{\link{crops}}. The plot can also be combined with the original data if required.
 }
 \examples{
 # see the crops example

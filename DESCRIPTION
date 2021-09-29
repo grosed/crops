@@ -7,7 +7,7 @@ Author: Daniel Grose <dan.grose@lancaster.ac.uk>, Paul Fearnhead <p.fearnhead@la
 Maintainer: Daniel Grose <dan.grose@lancaster.ac.uk>
 Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm of Haynes et al. (2014).
 License: GPL
-Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, pacman, Rdpack, methods
+Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, pacman, Rdpack, methods, cowplot
 Suggests: fpop, knitr, rmarkdown
 VignetteBuilder: knitr
 RdMacros: Rdpack

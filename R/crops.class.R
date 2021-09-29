@@ -16,7 +16,7 @@ crops.class<-function(log,beta_min,beta_max,iterations)
 #'
 #' @param object An instance of an S4 class produced by \code{\link{crops}}.
 #' 
-#' @return A data frame contianing the penalties, costs, penalised costs, and changepoint locations
+#' @return A data frame containing the penalties, costs, penalised costs, and changepoint locations
 #'
 #' @rdname segmentations-methods
 #'
@@ -45,17 +45,42 @@ setMethod("segmentations",signature=list("crops.class"),
             
 })
 
+#' Pretty printing for crops results
+#'
+#' @name print
+#'
+#' @description Pretty prints a summary of a crops result
+#'
+#' @docType methods
+#'
+#' @param  x An instance of an S4 class produced by \code{\link{crops}}.
+#'
+#' @rdname print-methods
+#'
+#' @aliases print,crops.class-method
+#' 
+#' @seealso \code{\link{crops}}.
+#'
+#' @examples
+#' # see the crops example
+#'
+setMethod("print",signature=list("crops.class"),
+          function(x)
+          {
+	    summary(x)            
+})
 
-#' Visualisation of data, costs, penatly values and changepoint locations.
+
+#' Visualisation of data, costs, penalty values and changepoint locations.
 #'
 #' @name plot
 #'
-#' @description Plot methods for an S4 object returned by \code{\link{crops}}. The plot can also overlay the original data over the changepoint locaations if required.
+#' @description Plot methods for an S4 object returned by \code{\link{crops}}. The plot can also be combined with the original data if required.
 #'
 #' @docType methods
 #'
 #' @param x An instance of an S4 class produced by \code{\link{crops}}.
-#' @param y A dataframe containing the locations and values of the data points. The data will be overlayed on the changepoint locations.
+#' @param y A dataframe containing the locations and values of the data points. The data plot is plotted below, and is aligned with, the changepoint locations.
 #' 
 #' @return A ggplot object.
 #'
@@ -68,24 +93,13 @@ setMethod("segmentations",signature=list("crops.class"),
 #' @examples
 #' # see the crops example
 #'
-#' @export 
+#' @export  
 setMethod("plot",signature=list("crops.class","data.frame"),
           function(x,y)
           {
-	    # appease ggplot2
-	    a <- b <- NULL
-	    object <- x
-	    data <- y
-            p <- plot(object)
-            df <- segmentations(object)
-            n <- nrow(df)
-            y <- data[,2]
-            y <- y - min(y)
-            y <- 0.75*n*y/(max(y) - min(y))
-            y <- y + n/2 - mean(y) 
-            x <- data[,1]
-            p <- p + geom_line(data=data.frame(a=x,b=y),aes(x=a,y=b),alpha=0.2)
-            return(p)
+	    p1 <- plot(x)
+	    p2 <- ggplot(data=y) + geom_line(aes(x=x,y=y))
+            return(plot_grid(p1,p2,ncol=1))
           })
 
 #' @name plot
@@ -160,3 +174,76 @@ setMethod("summary",signature=list("crops.class"),
 	    cat('\n',sep="")
             invisible()
 })
+
+
+#' Remove duplicate entries from a crops result
+#'
+#' @name unique
+#'
+#' @description Removes duplicate entries from a crops result. A duplicate entry is one having the same number of changepoints as another entry.
+#' Note that the changepoint locations and the associated penalty and cost values are not taken into consideration. The \code{unique} function can be useful
+#' for simplifying plots and the details produced by \code{segmentations}.
+#'
+#' @docType methods
+#'
+#' @param x An instance of an S4 class produced by \code{\link{crops}}.
+#'
+#' @return An instance of the S4 class type \code{crops.class}. This is the same type as produced by the \code{\link{crops}} function.
+#'
+#' @rdname unique-methods
+#'
+#' @aliases unique,crops.class-method
+#' 
+#'
+setMethod("unique",signature=list("crops.class"),
+         function(x)
+             {
+               hashmap <- new.env() 
+               for(entry in x@log)
+               {
+                  hashmap[[as.character(entry[3])]] <- entry
+               }
+               log <- set()
+               for(entry in ls(hashmap))
+               {
+                  log <- set_union(log,hashmap[[entry]])
+               }
+               x@log <- log
+               return(x)
+             })
+
+
+#' Subset crops results based on penalty values
+#'
+#' @name subset
+#'
+#' @description Removes entries from a crops result that fall outside a specified range of penalty values. 
+#' The \code{subset} function can be useful for simplifying plots and the details produced by \code{segmentations}.
+#'
+#' @docType methods
+#'
+#' @param x An instance of an S4 class produced by \code{\link{crops}}.
+#' @param beta_min A positive numeric value specifying the minimum penalty value for entries in the crops result. Default value is 0.
+#' @param beta_max A positive numeric value specifying the maximum penalty value for entries in the crops result. Default value is Inf.
+#'
+#' @return An instance of the S4 class type \code{crops.class}. This is the same type as produced by the \code{\link{crops}} function.
+#'
+#' @rdname subset-methods
+#'
+#' @aliases subset,crops.class-method
+#' 
+#'
+setMethod("subset",signature=list("crops.class"),
+         function(x,beta_min=0,beta_max=Inf)
+             {
+               log <- set()
+               for(entry in x@log)
+               {
+                  if(as.numeric(entry[1]) >= beta_min & as.numeric(entry[1]) <= beta_max)
+		  {
+		     log <- set_union(log,entry)
+		  }
+               }
+               x@log <- log
+               return(x)
+             })
