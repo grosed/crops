@@ -1,8 +1,9 @@
+setOldClass("memoised")
 setOldClass("set")
-.crops.class<-setClass("crops.class",representation(log="set",beta_min="numeric",beta_max="numeric",iterations="numeric"))
-crops.class<-function(log,beta_min,beta_max,iterations)
+.crops.class<-setClass("crops.class",representation(method="memoised",betas="set"))
+crops.class<-function(method,betas)
 {
-    .crops.class(log=log,beta_min=beta_min,beta_max=beta_max,iterations=iterations)
+    .crops.class(method=method,betas=betas)
 }
 
 
@@ -26,24 +27,27 @@ crops.class<-function(log,beta_min,beta_max,iterations)
 #'
 #' @examples
 #' # see the crops example
-#'
 setGeneric("segmentations",function(object) {standardGeneric("segmentations")})
 setMethod("segmentations",signature=list("crops.class"),
           function(object)
           {
-            n <- max(unlist(Map(function(.) length(unlist(.)),as.list(object@log)))) - 3
-            cpts <- Map(function(y) c(y[[4]],rep(NA,n-length(y[[4]]))), as.list(object@log))
-            mat <- Reduce(rbind,cpts,matrix(nrow=0,ncol=n),right=TRUE)
-            colnames(mat) <- unlist(Map(function(i) paste("cpt.",i,sep=""),1:n))
-            df<-data.frame(beta=numeric(),Qm=numeric(),Q=numeric(),m=numeric())
-            for(item in object@log)
-               {
-                  df[nrow(df)+1,] <- c(item[1:2],item[2] + item[3]*item[1],item[3])
-               }
-            df <- cbind(df,mat)
-            return(df)
-            
+            segs <- Map(object@method,unlist(object@betas))
+            n <- segs %>% Map(function(.) .[[2]],.) %>% Map(length,.) %>% unlist %>% max
+            mat <- segs %>% 
+                   Map(function(.) .[[2]],.) %>% 
+                   Map(function(.) c(.,rep(NA,n-length(.))),.) %>%
+                   Reduce(rbind,.,matrix(nrow=0,ncol=n),right=TRUE)
+                   colnames(mat) <- Map(function(.) paste("cpt.",.,sep=""),1:n) %>% unlist      
+            return(      
+                    Map(function(beta,seg) tibble(beta=beta,Qm=seg[[1]],Q=seg[[1]]+beta*length(seg[[2]]),
+                        m=length(seg[[2]])),
+                        unlist(object@betas),
+                        segs) %>%                                          
+                    Reduce(add_row,.,tibble(beta=numeric(),Qm=numeric(),Q=numeric(),m=numeric())) %>%
+                    cbind(.,mat)
+                   )           
 })
+
 
 #' Pretty printing for crops results
 #'
@@ -163,16 +167,14 @@ setMethod("summary",signature=list("crops.class"),
             cat("crops analysis",sep="")
 	    cat('\n',sep="")
 	    cat('\n',sep="")
-	    cat("minimum penalty value = ",object@beta_min," : maximum penalty value = ",object@beta_max,sep="")
+	    cat("minimum penalty value = ",min(object@betas)," : maximum penalty value = ",max(object@betas),sep="")
 	    cat('\n',sep="")
 	    segs <- segmentations(object)
 	    cat("number of segmentations calculated : ",nrow(segs),sep="")
 	    cat('\n',sep="")	    
 	    cat("least number of changepoints  = ",min(segs$m), " : maximum number of changepoints = ",max(segs$m),sep="")
 	    cat('\n',sep="")
-	    cat("number of iterations = ",object@iterations,sep="")
-	    cat('\n',sep="")
-            invisible()
+        invisible()
 })
 
 
@@ -198,18 +200,25 @@ setMethod("summary",signature=list("crops.class"),
 setMethod("unique",signature=list("crops.class"),
          function(x)
              {
-               hashmap <- new.env() 
-               for(entry in x@log)
-               {
-                  hashmap[[as.character(entry[3])]] <- entry
-               }
-               log <- set()
-               for(entry in ls(hashmap))
-               {
-                  log <- set_union(log,hashmap[[entry]])
-               }
-               x@log <- log
-               return(x)
+                object<-x
+                hash_map <- new.env()
+                keys <- object@betas %>% 
+                unlist %>% 
+                Map(object@method,.) %>% 
+                Map(function(.) .[2],.) %>% 
+                Map(as.character,.)
+                key_value_pairs <- Map(tuple,keys,object@betas %>% unlist)
+                hash_map <-    
+                key_value_pairs %>%  
+                Reduce(function(pair,map) {map[[pair[[1]]]] <- pair[[2]]; return(map);},
+                   .,
+                   hash_map,right=TRUE)
+                object@betas <-    
+                Map(function(key) hash_map[[key]],
+                    hash_map %>% ls) %>%
+                unname %>% 
+                as.set
+                return(object)
              })
 
 
@@ -236,14 +245,12 @@ setMethod("unique",signature=list("crops.class"),
 setMethod("subset",signature=list("crops.class"),
          function(x,beta_min=0,beta_max=Inf)
              {
-               log <- set()
-               for(entry in x@log)
-               {
-                  if(as.numeric(entry[1]) >= beta_min & as.numeric(entry[1]) <= beta_max)
-		  {
-		     log <- set_union(log,entry)
-		  }
-               }
-               x@log <- log
-               return(x)
+	        object <- x
+                object@betas %<>% 
+                unlist %>% 
+                Filter(function(.) . <= beta_max & . >= beta_min,.) %>% 
+                as.set
+                return(object)            
              })
+
+

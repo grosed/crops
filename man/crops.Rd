@@ -4,7 +4,7 @@
 \alias{crops}
 \title{Generic implementation of the crops algorithm (ref goes here).}
 \usage{
-crops(method, beta_min, beta_max, max_iterations = Inf, ...)
+crops(method, beta_min, beta_max, max_iterations = 20, ...)
 }
 \arguments{
 \item{method}{A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost, number of changepoints, and
@@ -14,7 +14,7 @@ a vector of changepoint locations corresponding to the optimal segmentation as d
 
 \item{beta_max}{A positive numeric value indicating the maximum penalty value to consider.}
 
-\item{max_iterations}{Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=Inf}}
+\item{max_iterations}{Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=20}}
 
 \item{...}{Additional parameters to pass to the underlying changepoint method if required.}
 }

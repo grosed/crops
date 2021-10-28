@@ -1,3 +1,30 @@
+crops.impl <- function(f,beta_star,n=20)
+{
+   if(n < 1 | set_is_empty(beta_star))
+       {
+          return(set())
+       }
+   # pick an element of beta_star 
+   beta <- as.list(beta_star)[[1]]
+   beta_0 <- beta[[1]]
+   beta_1 <- beta[[2]]
+   Qm_0 <- f(beta_0)[[1]]
+   Qm_1 <- f(beta_1)[[1]]
+   m_0 <- length(f(beta_0)[[2]])
+   m_1 <- length(f(beta_1)[[2]])
+   if(m_0 > m_1 + 1)
+   {
+        beta_int <- (Qm_1 - Qm_0)/(m_0-m_1)
+        Qm_int <- f(beta_int)[[1]]
+        m_int <- length(f(beta_int)[[2]])
+	    if(m_int != m_1)
+	    {
+           beta_star <- set_union(beta_star,set(tuple(beta_0,beta_int)),set(tuple(beta_int,beta_1)))   
+	    }
+   }
+   beta_star <- set_union(beta_star,crops.impl(f,set_symdiff(beta_star,set(beta)),n-1)) 
+   return(beta_star)
+}
 
 #' Generic implementation of the crops algorithm (ref goes here).
 #'
@@ -13,7 +40,7 @@
 #'
 #' @param beta_min A positive numeric value indicating the smallest penalty value to consider.
 #' @param beta_max A positive numeric value indicating the maximum penalty value to consider.
-#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=Inf}
+#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=20}
 #' @param ... Additional parameters to pass to the underlying changepoint method if required.
 #'
 #' @return An instance of an S4 class of type \code{crops.class}. 
@@ -72,58 +99,31 @@
 #' plot(res,df) 
 #'
 crops <-
-function(method,beta_min,beta_max,max_iterations=Inf,...)
+function(method,beta_min,beta_max,max_iterations=20,...)
     {
        check_crops_arguments(method,beta_min,beta_max,max_iterations)
-       CPT<-memoise(function(.)
+       CPT <-
+       function(.)
        {
 	   res <- method(.,...) 
            check_method_return_values(res)
            return(as.tuple(res))
-       })
-       tryCatch(
-       {
-       beta_star <- set(tuple(beta_min,beta_max))
-       log <- set()
-       iterations <- 0
-       while(!set_is_empty(beta_star) && iterations < max_iterations)
-           {
-             for(t in beta_star)
-                 {
-                   beta_0 <- t[[1]]
-                   beta_1 <- t[[2]]
-                   left <- as.tuple(c(beta_0,CPT(beta_0)))
-                   right <- as.tuple(c(beta_1,CPT(beta_1)))
-                   log <- set_union(log,set(left),set(right))
-                   if(left[[3]] > right[[3]] + 1)
-                    {
-                        beta_int <- (right[[2]] - left[[2]]) / (left[[3]] - right[[3]])
-                        int <- as.tuple(c(beta_int,CPT(beta_int)))
-                        log <- set_union(log,set(int))
-                        if(int[[3]] > right[[3]])
-                        {
-                           beta_star <- set_union(beta_star,set(tuple(beta_0,beta_int)),set(tuple(beta_int,beta_1)))
-                        }
-                    }
-                  beta_star <- set_symdiff(beta_star,set(t))
-                 }
-	     iterations <- iterations + 1	 
-            }
-	if(iterations == max_iterations)
-	{
-	   warning(paste("maximum number of iterations (=",max_iterations,") reached in crops.",'\n',sep=""))
-	}
-        return(crops.class(log,beta_min,beta_max,iterations))
-	},
-	interrupt = function(e)
-	            {
-		      warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
-		      return(crops.class(log,beta_min,beta_max,iterations))
-	            }
-	)
+       }
+       CPT %<>% memoise
+ #      tryCatch(
+ #      {
+          res <- crops.impl(CPT,set(tuple(beta_min,beta_max)),max_iterations)
+          object <- crops.class(CPT,res %>% unlist %>% as.set)
+          return(object)
+#	},
+#	interrupt = function(e)
+#	            {
+#		      warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
+#		      return(crops.class(log,beta_min,beta_max,iterations))
+#	            }
+#	)
     } 
 
 
 
 
-	  

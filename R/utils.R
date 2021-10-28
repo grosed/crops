@@ -37,15 +37,9 @@ check_method_return_values <- function(res)
       msg <- paste(msg,'\n')
       stop(msg)
     }
-    if(!is(res[[2]],'numeric') | length(res[[2]]) > 1 | res[[2]] < 0) 
+    if(!is(res[[2]],'numeric'))
     {
-      msg <- paste("Second value in the list returned by method should be a single positive real value. See crops documentation.")
-      msg <- paste(msg,'\n')
-      stop(msg)
-    }
-    if(!is(res[[3]],'numeric'))
-    {
-      msg <- paste("Third value in the list returned by method should be a numeric vector containing the changepoint locations. See crops documentation.")
+      msg <- paste("Second value in the list returned by method should be a numeric vector containing the changepoint locations. See crops documentation.")
       stop(msg)
     }
     return()

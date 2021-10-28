@@ -19,7 +19,6 @@ Produces a summary of the segmentations for each penalty value in the form of a 
 }
 \examples{
 # see the crops example
-
 }
 \seealso{
 \code{\link{crops}}.

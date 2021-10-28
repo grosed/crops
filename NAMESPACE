@@ -1,9 +1,10 @@
 export("crops")
 
-importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty)
+importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty,as.set)
 importFrom(methods,is,new)
 importFrom(stats,complete.cases)
 importFrom(cowplot,plot_grid)
+import(tibble)
 import(reshape)
 import(tidyverse)
 import(memoise)
