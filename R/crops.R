@@ -1,5 +1,7 @@
 crops.impl <- function(f,beta_star,n=20)
 {
+   tryCatch(
+   {
    if(n < 1 | set_is_empty(beta_star))
        {
           return(set())
@@ -24,6 +26,13 @@ crops.impl <- function(f,beta_star,n=20)
    }
    beta_star <- set_union(beta_star,crops.impl(f,set_symdiff(beta_star,set(beta)),n-1)) 
    return(beta_star)
+   },
+   interrupt = function(e)
+   {
+	warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
+	return(beta_star)
+   })
+
 }
 
 #' Generic implementation of the crops algorithm (ref goes here).
@@ -35,7 +44,7 @@ crops.impl <- function(f,beta_star,n=20)
 #' for a range of values for the number of changepoints. To make the method generic, the user must provide a function that maps a penalty value to the results obtained by a penalised cost
 #' changepoint method, and formats these results in a specific way. This interface to the generic method is similar to that as used by the \pkg{optimx} package.  
 #'
-#' @param method A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost, number of changepoints, and
+#' @param method A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost and
 #' a vector of changepoint locations corresponding to the optimal segmentation as determined by a penalised cost changepoint method.
 #'
 #' @param beta_min A positive numeric value indicating the smallest penalty value to consider.
@@ -83,7 +92,7 @@ crops.impl <- function(f,beta_star,n=20)
 #'                                     seg.cost=sum((seg.data-seg.mean)^2))
 #'             }
 #'         segs <- do.call(rbind, segs.list)
-#'         return(list(sum(segs$seg.cost),nrow(segs)-1,segs$end[-length(segs$end)]))
+#'         return(list(sum(segs$seg.cost),segs$end[-length(segs$end)]))
 #'     }
 #'
 #' # now use this wrapper function with crops
@@ -101,27 +110,13 @@ crops.impl <- function(f,beta_star,n=20)
 crops <-
 function(method,beta_min,beta_max,max_iterations=20,...)
     {
+       # appease package checks
+       . <- NULL
        check_crops_arguments(method,beta_min,beta_max,max_iterations)
-       CPT <-
-       function(.)
-       {
-	   res <- method(.,...) 
-           check_method_return_values(res)
-           return(as.tuple(res))
-       }
-       CPT %<>% memoise
- #      tryCatch(
- #      {
-          res <- crops.impl(CPT,set(tuple(beta_min,beta_max)),max_iterations)
-          object <- crops.class(CPT,res %>% unlist %>% as.set)
-          return(object)
-#	},
-#	interrupt = function(e)
-#	            {
-#		      warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
-#		      return(crops.class(log,beta_min,beta_max,iterations))
-#	            }
-#	)
+       CPT <- (. %>% method(...) %T>% check_method_return_values %>% as.tuple) %>% memoise
+       res <- crops.impl(CPT,set(tuple(beta_min,beta_max)),max_iterations)
+       object <- crops.class(CPT,res %>% unlist %>% as.set)
+       return(object)
     } 
 
 

@@ -31,6 +31,8 @@ setGeneric("segmentations",function(object) {standardGeneric("segmentations")})
 setMethod("segmentations",signature=list("crops.class"),
           function(object)
           {
+	    # appease package checks
+            . <- NULL
             segs <- Map(object@method,unlist(object@betas))
             n <- segs %>% Map(function(.) .[[2]],.) %>% Map(length,.) %>% unlist %>% max
             mat <- segs %>% 
@@ -200,6 +202,8 @@ setMethod("summary",signature=list("crops.class"),
 setMethod("unique",signature=list("crops.class"),
          function(x)
              {
+	     	# appease package checks
+                . <- NULL
                 object<-x
                 hash_map <- new.env()
                 keys <- object@betas %>% 
@@ -245,6 +249,8 @@ setMethod("unique",signature=list("crops.class"),
 setMethod("subset",signature=list("crops.class"),
          function(x,beta_min=0,beta_max=Inf)
              {
+	     	# appease package checks
+                . <- NULL
 	        object <- x
                 object@betas %<>% 
                 unlist %>% 

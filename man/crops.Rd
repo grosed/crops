@@ -7,7 +7,7 @@
 crops(method, beta_min, beta_max, max_iterations = 20, ...)
 }
 \arguments{
-\item{method}{A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost, number of changepoints, and
+\item{method}{A function mapping a penalty value to the results obtained by a penalised cost changepoint method. The function must return a list containing the cost and
 a vector of changepoint locations corresponding to the optimal segmentation as determined by a penalised cost changepoint method.}
 
 \item{beta_min}{A positive numeric value indicating the smallest penalty value to consider.}
@@ -58,7 +58,7 @@ fpop.for.crops<-function(beta)
                                     seg.cost=sum((seg.data-seg.mean)^2))
             }
         segs <- do.call(rbind, segs.list)
-        return(list(sum(segs$seg.cost),nrow(segs)-1,segs$end[-length(segs$end)]))
+        return(list(sum(segs$seg.cost),segs$end[-length(segs$end)]))
     }
 
 # now use this wrapper function with crops
