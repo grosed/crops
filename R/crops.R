@@ -1,39 +1,33 @@
 crops.impl <- function(f,beta_star,n=20)
 {
-   tryCatch(
-   {
-   if(n < 1 | set_is_empty(beta_star))
-       {
-          return(set())
-       }
-   # pick an element of beta_star 
-   beta <- as.list(beta_star)[[1]]
-   beta_0 <- beta[[1]]
-   beta_1 <- beta[[2]]
-   Qm_0 <- f(beta_0)[[1]]
-   Qm_1 <- f(beta_1)[[1]]
-   m_0 <- length(f(beta_0)[[2]])
-   m_1 <- length(f(beta_1)[[2]])
-   if(m_0 > m_1 + 1)
-   {
+  res <- set()
+  while(!set_is_empty(beta_star) & n > 0)
+  {
+     n <- n - 1
+     beta <- as.list(beta_star)[[length(beta_star)]]
+     beta_0 <- beta[[1]]
+     beta_1 <- beta[[2]]
+     Qm_0 <- f(beta_0)[[1]]
+     Qm_1 <- f(beta_1)[[1]]
+     m_0 <- length(f(beta_0)[[2]])
+     m_1 <- length(f(beta_1)[[2]])
+     if(m_0 > m_1 + 1)
+     {
         beta_int <- (Qm_1 - Qm_0)/(m_0-m_1)
         Qm_int <- f(beta_int)[[1]]
         m_int <- length(f(beta_int)[[2]])
-	    if(m_int != m_1)
+	if(m_int != m_1)
 	    {
-           beta_star <- set_union(beta_star,set(tuple(beta_0,beta_int)),set(tuple(beta_int,beta_1)))   
+	        
+		beta_star <- set_union(beta_star,set(tuple(beta_int,beta_1)),set(tuple(beta_0,beta_int)))
 	    }
-   }
-   beta_star <- set_union(beta_star,crops.impl(f,set_symdiff(beta_star,set(beta)),n-1)) 
-   return(beta_star)
-   },
-   interrupt = function(e)
-   {
-	warning("crops interrupted via CTRL-C. Expect results to be incomplete and/or corrupted.")
-	return(beta_star)
-   })
-
+     }
+     beta_star <- set_symdiff(beta_star,set(beta))
+     res <- set_union(res,beta)
+  }
+  return(res)
 }
+
 
 #' Generic implementation of the crops algorithm (ref goes here).
 #'
@@ -115,6 +109,7 @@ function(method,beta_min,beta_max,max_iterations=20,...)
        check_crops_arguments(method,beta_min,beta_max,max_iterations)
        CPT <- (. %>% method(...) %T>% check_method_return_values %>% as.tuple) %>% memoise
        res <- crops.impl(CPT,set(tuple(beta_min,beta_max)),max_iterations)
+       # res <- crops.impl.2(CPT,set(tuple(beta_min,beta_max)),max_iterations)
        object <- crops.class(CPT,res %>% unlist %>% as.set)
        return(object)
     } 
