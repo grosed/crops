@@ -138,7 +138,7 @@ setMethod("plot",signature=list("crops.class","missing"),
                   add(geom_point()) %>%
                   add(labs(x="location",y="penalty")) %>%
                   add(geom_hline(aes(yintercept=dummy))) %>%
-                  add(scale_y_continuous(breaks = seq(1:nrow(df)),labels=signif(df$beta,digits=3),sec.axis = sec_axis( ~.,breaks = seq(1:nrow(df)),labels=signif(df$Q,digits=4),name="penalised cost"))) %>%
+                  add(scale_y_continuous(breaks = seq(1:nrow(df)),labels=signif(df$beta,digits=3),sec.axis = sec_axis( ~.,breaks = seq(1:nrow(df)),labels=signif(df$Qm,digits=4),name="unpenalised cost"))) %>%
                   add(theme_bw())
              return(p)       
           })
