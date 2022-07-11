@@ -17,7 +17,7 @@
 \item{y}{A dataframe containing the locations and values of the data points. The data plot is plotted below, and is aligned with, the changepoint locations.}
 }
 \value{
-A ggplot object.
+A ggplot object. Note - if no changepoints are detected in the penalty interval [beta_min,beta_max], then the value returned is NULL.
 }
 \description{
 Plot methods for an S4 object returned by \code{\link{crops}}. The plot can also be combined with the original data if required.

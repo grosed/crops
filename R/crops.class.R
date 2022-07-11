@@ -17,7 +17,8 @@ crops.class<-function(method,betas)
 #'
 #' @param object An instance of an S4 class produced by \code{\link{crops}}.
 #' 
-#' @return A data frame containing the penalties, costs, penalised costs, and changepoint locations
+#' @return A data frame containing the penalties, costs, penalised costs, and changepoint locations. Note - if no changepoints are detected in
+#' the penalty interval [beta_min,beta_max], then the value returned is NULL. 
 #'
 #' @rdname segmentations-methods
 #'
@@ -34,6 +35,11 @@ setMethod("segmentations",signature=list("crops.class"),
 	    # appease package checks
             . <- NULL
             segs <- Map(object@method,unlist(object@betas))
+	    valid_segs <- Filter(function(x) length(x[[2]]) > 1, segs)
+	    if(length(valid_segs) == 0)
+	    {
+	       return(NULL)
+	    }
             n <- segs %>% Map(function(.) .[[2]],.) %>% Map(length,.) %>% unlist %>% max
             mat <- segs %>% 
                    Map(function(.) .[[2]],.) %>% 
@@ -88,7 +94,7 @@ setMethod("print",signature=list("crops.class"),
 #' @param x An instance of an S4 class produced by \code{\link{crops}}.
 #' @param y A dataframe containing the locations and values of the data points. The data plot is plotted below, and is aligned with, the changepoint locations.
 #' 
-#' @return A ggplot object.
+#' @return A ggplot object. Note - if no changepoints are detected in the penalty interval [beta_min,beta_max], then the value returned is NULL. 
 #'
 #' @rdname plot-methods
 #'
@@ -129,6 +135,10 @@ setMethod("plot",signature=list("crops.class","missing"),
 	     . <- Q <- Qm <- m <- value <- dummy <- NULL
 	     object <- x
              df <- segmentations(object)
+	     if(is.null(df))
+	     {
+	        return(NULL)
+	     }
 	     df <- cbind(df,data.frame("dummy"=1:nrow(df)))
              p <- df %>%
 	          subset(.,select = -c(beta,Q,Qm,m)) %>%
@@ -172,11 +182,19 @@ setMethod("summary",signature=list("crops.class"),
 	    cat("minimum penalty value = ",min(object@betas)," : maximum penalty value = ",max(object@betas),sep="")
 	    cat('\n',sep="")
 	    segs <- segmentations(object)
-	    cat("number of segmentations calculated : ",nrow(segs),sep="")
-	    cat('\n',sep="")	    
-	    cat("least number of changepoints  = ",min(segs$m), " : maximum number of changepoints = ",max(segs$m),sep="")
-	    cat('\n',sep="")
-        invisible()
+	    if(is.null(segs))
+	    {
+	       cat("no segmentations found in the penalty interval [",min(object@betas),",",max(object@betas),"]",sep="")
+	       cat('\n',sep="")
+	    }
+	    else
+	    {
+	       cat("number of segmentations calculated : ",nrow(segs),sep="")
+	       cat('\n',sep="")	    
+	       cat("least number of changepoints  = ",min(segs$m), " : maximum number of changepoints = ",max(segs$m),sep="")
+	       cat('\n',sep="")
+	    }
+	  invisible()
 })
 
 

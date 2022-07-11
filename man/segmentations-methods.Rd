@@ -12,7 +12,8 @@ segmentations(object)
 \item{object}{An instance of an S4 class produced by \code{\link{crops}}.}
 }
 \value{
-A data frame containing the penalties, costs, penalised costs, and changepoint locations
+A data frame containing the penalties, costs, penalised costs, and changepoint locations. Note - if no changepoints are detected in
+the penalty interval [beta_min,beta_max], then the value returned is NULL.
 }
 \description{
 Produces a summary of the segmentations for each penalty value in the form of a data frame.
