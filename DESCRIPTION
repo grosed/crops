@@ -13,3 +13,5 @@ Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, methods, cowplot,
 Suggests: fpop, pacman
 RdMacros: Rdpack
 RoxygenNote: 7.1.2
+URL: https://github.com/grosed/crops
+BugReports: https://github.com/grosed/crops/issues
