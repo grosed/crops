@@ -1,10 +1,9 @@
 crops.impl <- function(f,beta_star,n=20)
 {
   res <- set()
-  while(!set_is_empty(beta_star) & n > 0)
+  while(!set_is_empty(beta_star))
   {
-     n <- n - 1
-     beta <- as.list(beta_star)[[length(beta_star)]]
+     beta <- as.list(beta_star)[[1]]
      beta_0 <- beta[[1]]
      beta_1 <- beta[[2]]
      Qm_0 <- f(beta_0)[[1]]
@@ -14,15 +13,13 @@ crops.impl <- function(f,beta_star,n=20)
      if(m_0 > m_1 + 1)
      {
         beta_int <- (Qm_1 - Qm_0)/(m_0-m_1)
-        Qm_int <- f(beta_int)[[1]]
         m_int <- length(f(beta_int)[[2]])
-	if(m_int != m_1)
-	    {
-	        
+	if(m_int != m_1 && m_int != m_0)
+	    {   
 		beta_star <- set_union(beta_star,set(tuple(beta_int,beta_1)),set(tuple(beta_0,beta_int)))
 	    }
      }
-     beta_star <- set_symdiff(beta_star,set(beta))
+     beta_star <- beta_star - set(beta)
      res <- set_union(res,beta)
   }
   return(res)
@@ -43,7 +40,7 @@ crops.impl <- function(f,beta_star,n=20)
 #'
 #' @param beta_min A positive numeric value indicating the smallest penalty value to consider.
 #' @param beta_max A positive numeric value indicating the maximum penalty value to consider.
-#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=20}
+#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=20}. Note - this argument is deprecated and has no effect. Retained only for backward compatability.
 #' @param ... Additional parameters to pass to the underlying changepoint method if required.
 #'
 #' @return An instance of an S4 class of type \code{crops.class}. 
