@@ -12,4 +12,4 @@ License: GPL
 Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, methods, cowplot, tibble, Rdpack
 Suggests: fpop, pacman
 RdMacros: Rdpack
-RoxygenNote: 7.1.2
+Config/roxygen2/version: 8.1.0
