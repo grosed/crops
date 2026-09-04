@@ -1,7 +1,8 @@
-crops.impl <- function(f,beta_star,n=20)
+crops.impl <- function(f,beta_star,max_iterations)
 {
+  n <- 0 
   res <- set()
-  while(!set_is_empty(beta_star))
+  while(!set_is_empty(beta_star) && n < max_iterations)
   {
      beta <- as.list(beta_star)[[1]]
      beta_0 <- beta[[1]]
@@ -21,6 +22,7 @@ crops.impl <- function(f,beta_star,n=20)
      }
      beta_star <- beta_star - set(beta)
      res <- set_union(res,beta)
+     n <- n + 1
   }
   return(res)
 }
@@ -40,7 +42,7 @@ crops.impl <- function(f,beta_star,n=20)
 #'
 #' @param beta_min A positive numeric value indicating the smallest penalty value to consider.
 #' @param beta_max A positive numeric value indicating the maximum penalty value to consider.
-#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=20}. Note - this argument is deprecated and has no effect. Retained only for backward compatability.
+#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=Inf}.
 #' @param ... Additional parameters to pass to the underlying changepoint method if required.
 #'
 #' @return An instance of an S4 class of type \code{crops.class}. 
@@ -99,7 +101,7 @@ crops.impl <- function(f,beta_star,n=20)
 #' plot(res,df) 
 #'
 crops <-
-function(method,beta_min,beta_max,max_iterations=20,...)
+function(method,beta_min,beta_max,max_iterations=Inf,...)
     {
        # appease package checks
        . <- NULL
