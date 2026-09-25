@@ -9,7 +9,7 @@ Authors@R: c(person("Daniel", "Grose", role = c("aut", "cre"),email = "dan.grose
 	     person("Idris","Eckley",email="i.eckley@lancaster.ac.uk",role=c("ctb")))
 Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm of Haynes et al. (2017) <doi:10.1080/10618600.2015.1116445> for finding all of the optimal segmentations for multiple penalty values over a continuous range.
 License: GPL
-Imports: sets, reshape, tidyverse, memoise, ggplot2, magrittr, methods, cowplot, tibble, Rdpack
+Imports: sets, memoise, magrittr, methods, Rdpack
 Suggests: fpop, pacman
 RdMacros: Rdpack
 RoxygenNote: 7.1.2

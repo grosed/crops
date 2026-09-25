@@ -1,17 +1,10 @@
-export("crops")
-
 importFrom(Rdpack,reprompt)
 importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty,as.set)
 importFrom(methods,is,new)
-importFrom(stats,complete.cases)
-importFrom(cowplot,plot_grid)
-import(tibble)
-import(reshape)
 import(tidyverse)
 import(memoise)
-import(ggplot2)
 import(magrittr)
 
 export(crops)
+exportClass(crops.class)
 
-exportMethods(plot,segmentations,summary,unique,subset,print)
