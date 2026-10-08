@@ -1,8 +1,7 @@
-crops.impl <- function(f,beta_star,max_iterations)
+crops.impl <- function(f,beta_star)
 {
-  n <- 0 
   res <- set()
-  while(!set_is_empty(beta_star) && n < max_iterations)
+  while(!set_is_empty(beta_star))
   {
      beta <- as.list(beta_star)[[1]]
      beta_0 <- beta[[1]]
@@ -22,7 +21,6 @@ crops.impl <- function(f,beta_star,max_iterations)
      }
      beta_star <- beta_star - set(beta)
      res <- set_union(res,beta)
-     n <- n + 1
   }
   return(res)
 }
@@ -42,7 +40,6 @@ crops.impl <- function(f,beta_star,max_iterations)
 #' propagated through the call to \code{crops} 
 #' @param beta_min A positive numeric value indicating the smallest penalty value to consider.
 #' @param beta_max A positive numeric value indicating the maximum penalty value to consider.
-#' @param max_iterations Positive non zero integer. Limits the maximum number of iterations of the crops algorithm to \code{max_iterations}. Default value is \code{max_iterations=Inf}.
 #' @param ... Additional parameters to pass to the underlying changepoint method if required.
 #'
 #' @return An instance of an S4 class of type \code{crops.class}. 
@@ -55,53 +52,45 @@ crops.impl <- function(f,beta_star,max_iterations)
 #' @references \insertRef{fpop-package}{crops}
 #'
 #' @examples
-#' library(cpop)
 #' library(crops)
 #' 
-#' # create a function to wrap a call to cpop for use with crops
-#' cpop.crops.eg <- function(y,x,grid,sd,minseglen,prune.approx)
+#' # create a segmentation function for demonstration
+#' toy_segmentation_function <- function(beta)
 #' {
-#'   return(function(beta)
-#'          {
-#'            res <- cpop(y=y,x=x,grid=grid,beta=beta,sd=sd,minseglen=minseglen,
-#'                        prune.approx=prune.approx)
-#'            cpts <- changepoints(res)
-#'            ncpts <- nrow(cpts)
-#'            cost <- cost(res) - ncpts*beta
-#'            return(list(cost,ncpts,res))
-#'          }
-#'        )
+#'    x <- c(0.0,1.0,1.4,1.5,1.9)
+#'    C <- c(2.5,4.0,4.4,5.6,9.5)
+#'    n <- c(10,8,8,7,6)
+#'    i <- findInterval(beta,x)
+#'    return(as.list(c(C[i],n[i])))
 #' }
+#'
+#' # plot the segmentation function
+#' beta <- seq(0.0,3.0,0.01)
+#' values <- Map(toy_segmentation_function,beta)
+#' C <- as.numeric(Map(function(.) (.)[[1]],values))
+#' n <- as.numeric(Map(function(.) (.)[[2]],values))
+#' plot(beta,n,type="l",col="red",ylim=c(2.0,10))
+#' lines(beta,C,type="l",col="green")
+#' legend("bottomright",
+#'        legend = c("Unpenalized Cost", "Number of Changepoints"),
+#'        col = c("green", "red"),
+#'        pch = c(19, 17),
+#'        lty = c(1, 1))
 #' 
-#' # generate some data
-#' set.seed(0)
-#' x <- seq(0,1,0.01)
-#' n <- length(x)
-#' sd <- rep(0.1,n)
-#' mu <- c(2*x[1:floor(n/2)],2 - 2*x[(floor(n/2)+1):n])
-#' y <- rnorm(n,mu,sd)
-#' 
-#' # calculate the changepoint locations and cost over a range of penalty values
-#' res <- cpop.crops(y,x,sd=sd,beta_min=0.4*log(length(y)),beta_max=2.5*log(length(y)))
-#' 
-#' # summarise results
-#' summary(res)
-#' 
-#' # extract the segmentations
-#' segmentations(res)
-#' 
-#' # plot the results
-#' plot(res)
+#' # analyse with crops
+#' results <- crops(toy_segmentation_function,0.0,3.0)
+#'
+#' # x summarise results
+#' Map(results@method,as.list(results@betas))
 #'
 crops <-
-function(method,beta_min,beta_max,max_iterations=Inf,...)
+function(method,beta_min,beta_max,...)
     {
        # appease package checks
        . <- NULL
-       check_crops_arguments(method,beta_min,beta_max,max_iterations)
+       check_crops_arguments(method,beta_min,beta_max)
        CPT <- (. %>% method(...) %T>% check_method_return_values %>% as.tuple) %>% memoise
-       res <- crops.impl(CPT,set(tuple(beta_min,beta_max)),max_iterations)
-       # res <- crops.impl.2(CPT,set(tuple(beta_min,beta_max)),max_iterations)
+       res <- crops.impl(CPT,set(tuple(beta_min,beta_max)))
        object <- crops.class(CPT,res %>% unlist %>% as.set)
        return(object)
     } 

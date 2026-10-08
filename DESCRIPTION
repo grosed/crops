@@ -1,8 +1,8 @@
 Package: crops
 Type: Package
 Title: Changepoints for a Range of Penalties (CROPS)
-Version: 1.0.4
-Date: 2026-09-04
+Version: 1.0.5
+Date: 2026-10-08
 Maintainer: Daniel Grose <dan.grose@lancaster.ac.uk>
 Authors@R: c(person("Daniel", "Grose", role = c("aut", "cre"),email = "dan.grose@lancaster.ac.uk"),
              person("Paul", "Fearnhead", role = "aut",email = "p.fearnhead@lancaster.ac.uk"),
@@ -10,6 +10,5 @@ Authors@R: c(person("Daniel", "Grose", role = c("aut", "cre"),email = "dan.grose
 Description: Implements the Changepoints for a Range of Penalties (CROPS) algorithm of Haynes et al. (2017) <doi:10.1080/10618600.2015.1116445> for finding all of the optimal segmentations for multiple penalty values over a continuous range.
 License: GPL
 Imports: sets, memoise, magrittr, methods, Rdpack
-Suggests: fpop, pacman
 RdMacros: Rdpack
-RoxygenNote: 7.1.2
+Config/roxygen2/version: 8.1.0

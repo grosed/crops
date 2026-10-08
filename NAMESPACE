@@ -1,9 +1,8 @@
 importFrom(Rdpack,reprompt)
 importFrom(sets,set,tuple,as.tuple,set_union,set_symdiff,set_is_empty,as.set)
 importFrom(methods,is,new)
-# import(tidyverse)
 import(memoise)
-#import(magrittr)
+import(magrittr)
 
 export(crops)
 exportClass(crops.class)

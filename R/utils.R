@@ -1,5 +1,5 @@
 
-check_crops_arguments <- function(method,beta_min,beta_max,max_iterations)
+check_crops_arguments <- function(method,beta_min,beta_max)
 {
     if(!is(method,'function'))
     {
@@ -16,10 +16,6 @@ check_crops_arguments <- function(method,beta_min,beta_max,max_iterations)
     if(beta_min >= beta_max)
     {
        stop("beta_max should be greater than beta_min. See crops documentation.")
-    }
-    if(!is(max_iterations,'numeric') | max_iterations < 1)
-    {
-       stop("max_iterations should be an integer greater than 0. See crops documentation.")
     }
     return()
 }
@@ -39,7 +35,7 @@ check_method_return_values <- function(res)
     }
     if(!is(res[[2]],'numeric'))
     {
-      msg <- paste("Second value in the list returned by method should be a numeric vector containing the changepoint locations. See crops documentation.")
+      msg <- paste("Second value in the list returned by method should be a single integer numeric value indicating the number of changepoints. See crops documentation.")
       stop(msg)
     }
     return()
