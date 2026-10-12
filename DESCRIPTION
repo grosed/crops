@@ -2,7 +2,7 @@ Package: crops
 Type: Package
 Title: Changepoints for a Range of Penalties (CROPS)
 Version: 1.0.5
-Date: 2026-10-08
+Date: 2026-12-08
 Maintainer: Daniel Grose <dan.grose@lancaster.ac.uk>
 Authors@R: c(person("Daniel", "Grose", role = c("aut", "cre"),email = "dan.grose@lancaster.ac.uk"),
              person("Paul", "Fearnhead", role = "aut",email = "p.fearnhead@lancaster.ac.uk"),

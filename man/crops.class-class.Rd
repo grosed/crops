@@ -4,7 +4,7 @@
 \name{crops.class-class}
 \alias{crops.class-class}
 \alias{.crops.class}
-\title{An S4 class to encapsulate results produced by running a \code{crops} analysis}
+\title{crops.class}
 \description{
 An S4 class to encapsulate results produced by running a \code{crops} analysis
 }
